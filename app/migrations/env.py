@@ -7,7 +7,7 @@ from alembic import context
 
 from app.database.base import Base
 from app.models import * # noqa
-from app.database.session import engine
+from app.database.session import engine # reuse existing async engine from the project
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -31,6 +31,7 @@ target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
+     # rarely used — generates a SQL file without connecting to the DB
     """Run migrations in 'offline' mode.
 
     This configures the context with just a URL
@@ -54,6 +55,7 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 def do_run_migrations(connection):
+     # separate function because run_sync takes a function and passes connection to it automatically
     context.configure(connection=connection, target_metadata=target_metadata)
     with context.begin_transaction():
         context.run_migrations()
@@ -65,12 +67,15 @@ async def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    # main mode — connect to DB and apply migrations
+    # engine already knows the URL from .env, so no config duplication
     
     async with engine.connect() as conn:
+        # run_sync is a bridge between async connection and sync Alembic internals
         await conn.run_sync(do_run_migrations)
 
 if context.is_offline_mode():
     run_migrations_offline()
 else:
     import asyncio
-    asyncio.run(run_migrations_online())
+    asyncio.run(run_migrations_online()) # asyncio.run starts the async function
