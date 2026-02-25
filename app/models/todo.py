@@ -20,5 +20,5 @@ class Todo(Base):
     completed: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
-    user_id : Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    user_id : Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     user: Mapped[User] = relationship("User", back_populates="todos")
