@@ -9,7 +9,7 @@ class TodoService:
     def __init__(self, repo: TodoRepository):
         self.repo = repo
 
-
+    
     async def get_all(self) -> list[Todo]:
         return await self.repo.get_all()
     
