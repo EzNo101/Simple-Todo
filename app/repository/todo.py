@@ -17,8 +17,16 @@ class TodoRepository:
         result = await self.session.execute(select(Todo).where(Todo.id == id))
         return result.scalar_one_or_none()
     
-    async def create_todo(self, data: TodoCreate) -> Todo:
-        todo = Todo(**data.model_dump()) # in session we can transfer only sqlalchemy model (we create it from pydantic schema)
+    async def get_all_by_user(self, user_id: int) -> list[Todo]:
+        result = await self.session.execute(select(Todo).where(Todo.user_id == user_id))
+        return result.scalars().all()
+    
+    async def get_by_id_and_user(self, todo_id: int, user_id: int) -> Todo | None:
+        result = await self.session.execute(select(Todo).where((Todo.id == todo_id) & (Todo.user_id == user_id)))
+        return result.scalar_one_or_none()
+
+    async def create_todo(self, data: TodoCreate, user_id: int) -> Todo:
+        todo = Todo(**data.model_dump(), user_id=user_id) # in session we can transfer only sqlalchemy model (we create it from pydantic schema)
         self.session.add(todo)
         await self.session.commit()
         await self.session.refresh(todo)

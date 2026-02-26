@@ -15,6 +15,12 @@ class UserService:
             raise HTTPException(status_code=400, detail="Email already registered")
         hashed_password = hash_password(data.password)
         return await self.repo.create_user(data, hashed_password)
+    
+    async def get_by_id(self, id: int) -> User:
+        user = await self.repo.get_by_id(id)
+        if user is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return user
 
     async def get_by_email(self, email: str) -> User:
         user = await self.repo.get_by_email(email)
