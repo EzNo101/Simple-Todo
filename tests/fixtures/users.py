@@ -12,3 +12,7 @@ async def user_token(async_client):
     login_response = await  async_client.post("/auth/login", data=login_data)
     token = login_response.json()["access_token"]
     return token
+
+@pytest_asyncio.fixture
+def user_factory():
+    return UserFactory
